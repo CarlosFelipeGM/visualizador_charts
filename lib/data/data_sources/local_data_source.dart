@@ -2,7 +2,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum TipoChart {
   bar(id: 'bar'),
-  line(id: 'line');
+  line(id: 'line'),
+  pie(id: 'pie');
 
   final String id;
   const TipoChart({required this.id});

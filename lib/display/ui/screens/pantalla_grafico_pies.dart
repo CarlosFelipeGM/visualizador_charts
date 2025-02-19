@@ -1,35 +1,35 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:visualizador_charts/data/models/bar_model.dart';
-import 'package:visualizador_charts/data/repositories/bar_repository.dart';
+import 'package:visualizador_charts/data/models/pie_model.dart';
+import 'package:visualizador_charts/data/repositories/pie_repository.dart';
 import 'package:visualizador_charts/display/ui/components/input_grafico.dart';
 import 'package:visualizador_charts/display/ui/utils/utils.dart';
 
-class PantallaGraficoBarras extends StatefulWidget {
-  const PantallaGraficoBarras({super.key});
+class PantallaGraficoPies extends StatefulWidget {
+  const PantallaGraficoPies({super.key});
 
   @override
-  State<PantallaGraficoBarras> createState() => _PantallaGraficoBarrasState();
+  State<PantallaGraficoPies> createState() => _PantallaGraficoPiesState();
 }
 
-class _PantallaGraficoBarrasState extends State<PantallaGraficoBarras> {
-  final _ejeXTextEditingController = TextEditingController();
-  final _ejeYTextEditingController = TextEditingController();
+class _PantallaGraficoPiesState extends State<PantallaGraficoPies> {
+  final _etiquetaTextEditingController = TextEditingController();
+  final _valorTextEditingController = TextEditingController();
   final _idFormulario = GlobalKey<FormState>();
 
-  BarModel? _barModel;
+  PieModel? _pieModel;
 
   @override
   void initState() {
     super.initState();
     setState(() {
-      _barModel = barRepository.obtenerDatosBarras();
+      _pieModel = pieRepository.obtenerDatosTajadas();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_barModel == null) {
+    if (_pieModel == null) {
       return Scaffold(
         appBar: AppBar(),
         body: Center(
@@ -39,7 +39,7 @@ class _PantallaGraficoBarrasState extends State<PantallaGraficoBarras> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Gráfico de barras'),
+        title: const Text('Gráfico de pies'),
       ),
       body: ListView(
         children: [
@@ -47,9 +47,9 @@ class _PantallaGraficoBarrasState extends State<PantallaGraficoBarras> {
             padding: const EdgeInsets.only(top: 16),
             child: SizedBox(
               height: 180,
-              child: BarChart(
-                BarChartData(
-                  barTouchData: BarTouchData(
+              child: PieChart(
+                PieChartData(
+                  pieTouchData: PieTouchData(
                     touchTooltipData: BarTouchTooltipData(
                       direction: TooltipDirection.bottom,
                     ),
@@ -62,16 +62,17 @@ class _PantallaGraficoBarrasState extends State<PantallaGraficoBarras> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (value, meta) {
-                          return Text(_barModel!.ejeX[value.toInt()]);
+                          return Text(_pieModel!.etiqueta[value.toInt()]);
                         },
                       ),
                     ),
                   ),
-                  barGroups: _barModel!.ejeY.asMap().entries.map((valor) {
-                    return BarChartGroupData(
-                      x: valor.key,
+                  pieGroups: _pieModel!.valor.asMap().entries.map((elemento) {
+                    return PieChartGroupData(
+                      x: elemento.key,
                       barRods: [
-                        BarChartRodData(toY: valor.value, color: Colors.blue),
+                        PieChartRodData(
+                            toY: elemento.value, color: Colors.blue),
                       ],
                     );
                   }).toList(),
@@ -87,8 +88,8 @@ class _PantallaGraficoBarrasState extends State<PantallaGraficoBarras> {
                 spacing: 8,
                 children: [
                   InputGrafico(
-                    controller: _ejeXTextEditingController,
-                    label: 'Dato eje X',
+                    controller: _etiquetaTextEditingController,
+                    label: 'Etiqueta',
                     autocorrect: false,
                     textInputType: TextInputType.text,
                     validator: (valor) {
@@ -96,8 +97,8 @@ class _PantallaGraficoBarrasState extends State<PantallaGraficoBarras> {
                     },
                   ),
                   InputGrafico(
-                    controller: _ejeYTextEditingController,
-                    label: 'Dato eje Y',
+                    controller: _valorTextEditingController,
+                    label: 'Valor',
                     autocorrect: false,
                     textInputType: TextInputType.number,
                     validator: (valor) {
@@ -107,16 +108,17 @@ class _PantallaGraficoBarrasState extends State<PantallaGraficoBarras> {
                   ElevatedButton.icon(
                     onPressed: () {
                       final esValiado = _idFormulario.currentState?.validate();
-                      final barModel = _barModel;
+                      final pieModel = _pieModel;
 
-                      if (esValiado == true && barModel != null) {
+                      if (esValiado == true && pieModel != null) {
                         setState(() {
-                          barModel.ejeX.add(_ejeXTextEditingController.text);
-                          barModel.ejeY.add(
-                              double.parse(_ejeYTextEditingController.text));
+                          pieModel.etiqueta
+                              .add(_etiquetaTextEditingController.text);
+                          pieModel.valor.add(
+                              double.parse(_valorTextEditingController.text));
                         });
 
-                        barRepository.guardarBarrasDatos(barModel);
+                        pieRepository.guardarTajadasDatos(pieModel);
                       }
                     },
                     label: const Text('Agregar'),
@@ -126,14 +128,14 @@ class _PantallaGraficoBarrasState extends State<PantallaGraficoBarras> {
                     onPressed: () {
                       Alertas.mostrarAlertaDeConfirmacion(context,
                           alBorrar: (ctx) {
-                        final barModel = _barModel;
-                        if (barModel != null) {
+                        final pieModel = _pieModel;
+                        if (pieModel != null) {
                           setState(() {
-                            barModel.ejeX.removeLast();
-                            barModel.ejeY.removeLast();
+                            pieModel.etiqueta.removeLast();
+                            pieModel.valor.removeLast();
                           });
 
-                          barRepository.guardarBarrasDatos(barModel);
+                          pieRepository.guardarTajadasDatos(pieModel);
 
                           Navigator.pop(ctx);
                         }
@@ -154,7 +156,7 @@ class _PantallaGraficoBarrasState extends State<PantallaGraficoBarras> {
   @override
   void dispose() {
     super.dispose();
-    _ejeXTextEditingController.dispose();
-    _ejeYTextEditingController.dispose();
+    _etiquetaTextEditingController.dispose();
+    _valorTextEditingController.dispose();
   }
 }
