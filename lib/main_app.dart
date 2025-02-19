@@ -11,6 +11,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       routes: {
         Routes.home: (_) => const PaginaPrincipal(),
         Routes.graficoBarras: (_) => const PantallaGraficoBarras(),

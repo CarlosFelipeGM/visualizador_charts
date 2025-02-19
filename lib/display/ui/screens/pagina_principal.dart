@@ -26,9 +26,9 @@ class PaginaPrincipal extends StatelessWidget {
             },
           ),
           TileDeGraficos(
-            titulo: 'Gráfico de Pie',
+            titulo: 'Gráfico de Pies',
             alPresionar: () {
-              // Agregar grafico de torta
+              Navigator.pushNamed(context, Routes.graficoPies);
             },
           ),
         ],

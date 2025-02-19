@@ -13,9 +13,17 @@ class PantallaGraficoPies extends StatefulWidget {
 }
 
 class _PantallaGraficoPiesState extends State<PantallaGraficoPies> {
+  final _colores = [
+    Colors.yellow,
+    Colors.blue,
+    Colors.green,
+    Colors.purple,
+    Colors.pink,
+  ];
   final _etiquetaTextEditingController = TextEditingController();
   final _valorTextEditingController = TextEditingController();
   final _idFormulario = GlobalKey<FormState>();
+  int touchedIndex = -1;
 
   PieModel? _pieModel;
 
@@ -50,32 +58,25 @@ class _PantallaGraficoPiesState extends State<PantallaGraficoPies> {
               child: PieChart(
                 PieChartData(
                   pieTouchData: PieTouchData(
-                    touchTooltipData: BarTouchTooltipData(
-                      direction: TooltipDirection.bottom,
-                    ),
+                    touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                      setState(() {
+                        if (!event.isInterestedForInteractions ||
+                            pieTouchResponse == null ||
+                            pieTouchResponse.touchedSection == null) {
+                          touchedIndex = -1;
+                          return;
+                        }
+                        touchedIndex = pieTouchResponse
+                            .touchedSection!.touchedSectionIndex;
+                      });
+                    },
                   ),
-                  titlesData: FlTitlesData(
-                    topTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          return Text(_pieModel!.etiqueta[value.toInt()]);
-                        },
-                      ),
-                    ),
+                  borderData: FlBorderData(
+                    show: false,
                   ),
-                  pieGroups: _pieModel!.valor.asMap().entries.map((elemento) {
-                    return PieChartGroupData(
-                      x: elemento.key,
-                      barRods: [
-                        PieChartRodData(
-                            toY: elemento.value, color: Colors.blue),
-                      ],
-                    );
-                  }).toList(),
+                  sectionsSpace: 0,
+                  centerSpaceRadius: 40,
+                  sections: showingSections(),
                 ),
               ),
             ),
@@ -151,6 +152,27 @@ class _PantallaGraficoPiesState extends State<PantallaGraficoPies> {
         ],
       ),
     );
+  }
+
+  List<PieChartSectionData> showingSections() {
+    return _pieModel!.valor.asMap().entries.map((elemento) {
+      final isTouched = elemento.key == touchedIndex;
+      final fontSize = isTouched ? 25.0 : 16.0;
+      final radius = isTouched ? 60.0 : 50.0;
+      const shadows = [Shadow(color: Colors.black, blurRadius: 2)];
+      return PieChartSectionData(
+        color: _colores[elemento.key],
+        value: elemento.value,
+        title: _pieModel!.etiqueta[elemento.key],
+        radius: radius,
+        titleStyle: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          shadows: shadows,
+        ),
+      );
+    }).toList();
   }
 
   @override
