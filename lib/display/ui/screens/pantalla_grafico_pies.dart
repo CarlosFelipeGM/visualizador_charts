@@ -16,6 +16,7 @@ class _PantallaGraficoPiesState extends State<PantallaGraficoPies> {
   final _colores = [
     Colors.yellow,
     Colors.blue,
+    Colors.red,
     Colors.green,
     Colors.purple,
     Colors.pink,
@@ -55,30 +56,9 @@ class _PantallaGraficoPiesState extends State<PantallaGraficoPies> {
             padding: const EdgeInsets.only(top: 16),
             child: SizedBox(
               height: 180,
-              child: PieChart(
-                PieChartData(
-                  pieTouchData: PieTouchData(
-                    touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                      setState(() {
-                        if (!event.isInterestedForInteractions ||
-                            pieTouchResponse == null ||
-                            pieTouchResponse.touchedSection == null) {
-                          touchedIndex = -1;
-                          return;
-                        }
-                        touchedIndex = pieTouchResponse
-                            .touchedSection!.touchedSectionIndex;
-                      });
-                    },
-                  ),
-                  borderData: FlBorderData(
-                    show: false,
-                  ),
-                  sectionsSpace: 0,
-                  centerSpaceRadius: 40,
-                  sections: showingSections(),
-                ),
-              ),
+              child: (_pieModel!.etiqueta.isNotEmpty)
+                  ? _dibujarPie()
+                  : Placeholder(),
             ),
           ),
           Form(
@@ -150,6 +130,33 @@ class _PantallaGraficoPiesState extends State<PantallaGraficoPies> {
             ),
           )
         ],
+      ),
+    );
+  }
+
+  PieChart _dibujarPie() {
+    return PieChart(
+      PieChartData(
+        pieTouchData: PieTouchData(
+          touchCallback: (FlTouchEvent event, pieTouchResponse) {
+            setState(() {
+              if (!event.isInterestedForInteractions ||
+                  pieTouchResponse == null ||
+                  pieTouchResponse.touchedSection == null) {
+                touchedIndex = -1;
+                return;
+              }
+              touchedIndex =
+                  pieTouchResponse.touchedSection!.touchedSectionIndex;
+            });
+          },
+        ),
+        borderData: FlBorderData(
+          show: false,
+        ),
+        sectionsSpace: 5,
+        centerSpaceRadius: 40,
+        sections: showingSections(),
       ),
     );
   }
